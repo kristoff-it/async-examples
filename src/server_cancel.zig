@@ -1,19 +1,19 @@
-//! This example is about the ability to cancel an coroutine that dispatches
+//! This example is about the ability to cancel a coroutine that dispatches
 //! all I/O to other coroutines (and thus that exclusively blocks on `.await`,
 //! rather than directly writing/reading or sleeping, for example).
 //!
 //! Currently canceling the dispatching coroutine has no effect as it never
-//! gets to observe the cacellation flag.
+//! gets to observe the cancellation flag.
 //!
 //! Things to consider:
 //! - Making `future.await` unblock on cancellation either by propagating the cancellation
-//!   implicitly to the awaited coroutine, or by just unbloking the call to `await`.
+//!   implicitly to the awaited coroutine, or by just unblocking the call to `await`.
 //! - Having `io.async` and `io.concurrent` (and same for `Group` equivalents) fail
 //!   with `error.Canceled` (although this by itself is not a full solution).
 //! - Add the concept of cancel-safe critical sections within a coroutine.
 //!
 //! After running the main example, read the comments and code at the bottom of this file
-//! for more variations of this use case and some proposed solutions.
+//! for more variations of this use-case and some proposed solutions.
 
 const std = @import("std");
 const Io = std.Io;
@@ -43,7 +43,7 @@ fn loopALot(io: Io) !void {
         // We start another coroutine and await its result.
         // In this case we're calling io.sleep inside of the spawned coroutine,
         // but it doesn't really matter what it is that we do in there, this is
-        // just a way of make it do "work".
+        // just a way of making it do "work".
         //
         // If you swap the concurrent/await lines with the currently commented
         // `io.sleep` line, the cancellation request from main will instead be
@@ -97,14 +97,14 @@ fn requestHandler2(io: Io, db: anytype) !void {
     // since `io.async` could decide to run the callback inline, which
     // would fail to protect the database connection.
 }
-// But to support this last approach, then you would need to:
+// But to support this last approach you would need to:
 // 1. unblock `requestHandler` from `future.await` *WITHOUT* canceling the
 //    database query.
 // 2. allow `requestHandler` to re-await the completion of the spawned
-//    coroutine, if desireable (in this example it is desireable, but in other
-//    cases it might not).
+//    coroutine, if desirable (in this example it is desirable, but in other
+//    cases it might not be).
 //
-// Here's how this could look like:
+// Here's what this could look like:
 fn requestHandler3(io: Io, db: anytype) !void {
     const future = try io.concurrent(@TypeOf(db).query, .{ db, "SELECT FROM bla bla" });
     const results = future.await(io) catch |err| switch (err) {
