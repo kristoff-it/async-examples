@@ -13,7 +13,8 @@
 //! - Add the concept of cancel-safe critical sections within a coroutine.
 //!
 //! After running the main example, read the comments and code at the bottom of this file
-//! for more variations of this use-case and some proposed solutions.
+//! for more variations of this use case and some proposed solutions (it should be
+//! noted that the proposed solutions are just starting points, not full solutions).
 
 const std = @import("std");
 const Io = std.Io;
